@@ -60,7 +60,14 @@ all: build test
 
 build: build-rust build-go
 
-build-rust: librust_cosmwasm_enclave.signed.so query_enclave lib/libEnclave_u.a lib/libQueryEnclave_u.a
+build-headers:
+	cd ../cosmwasm/packages/enclave-ffi-types && cargo build -Z unstable-options --profile $(BUILD_PROFILE) --features "build_headers"
+	mkdir -p ./target/headers/
+	cp ../cosmwasm/target/headers/enclave-ffi-types.h ./target/headers/
+	@ #this pulls out ELF symbols, 80% size reduction!
+
+
+build-rust: build-headers librust_cosmwasm_enclave.signed.so query_enclave lib/libEnclave_u.a lib/libQueryEnclave_u.a
 	cargo build -Z unstable-options --profile $(BUILD_PROFILE) --features "$(FEATURES_U)"
 	cp target/$(BUILD_PROFILE)/libgo_cosmwasm.$(DLL_EXT) api
 	@ #this pulls out ELF symbols, 80% size reduction!
@@ -81,9 +88,9 @@ lib/libEnclave_u.a: $(Enclave_Path)/Enclave.edl target/headers/enclave-ffi-types
 	mkdir -p lib
 	$(AR) rcsD $@ Enclave_u.o
 
-lib/libQueryEnclave_u.a: $(Query_Enclave_Path)/Enclave.edl build-enclave
+lib/libQueryEnclave_u.a: $(Query_Enclave_Path)/Enclave.edl target/headers/enclave-ffi-types.h build-query_enclave
 	mkdir -p query_enclave
-	sgx_edger8r --use-prefix --untrusted $< --search-path $(SGX_SDK)/include --search-path $(CUSTOM_EDL_PATH) --untrusted-dir ./query_enclave
+	sgx_edger8r --untrusted $< --search-path $(SGX_SDK)/include --search-path $(CUSTOM_EDL_PATH) --untrusted-dir ./query_enclave
 	$(CC) $(App_C_Flags) -c ./query_enclave/Enclave_u.c -o ./Query_Enclave_u.o
 	rm ./query_enclave/Enclave_u.c
 	$(AR) rcsD $@ Query_Enclave_u.o
