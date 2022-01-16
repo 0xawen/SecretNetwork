@@ -54,20 +54,13 @@ App_C_Flags := $(SGX_COMMON_CFLAGS) -fPIC -Wno-attributes $(App_Include_Paths)
 Query_Enclave_Path := ../cosmwasm/packages/enclaves/query/
 Enclave_Path := ../cosmwasm/packages/wasmi-runtime
 Enclave_EDL_Products := Enclave_u.c Enclave_u.h
-Query_Enclave_EDL_Products := Query_Enclave_u.c Query_Enclave_u.h
+Query_Enclave_EDL_Products := QueryEnclave_u.c QueryEnclave_u.h
 
 all: build test
 
 build: build-rust build-go
 
-build-headers:
-	cd ../cosmwasm/packages/enclave-ffi-types && cargo build -Z unstable-options --profile $(BUILD_PROFILE) --features "build_headers"
-	mkdir -p ./target/headers/
-	cp ../cosmwasm/target/headers/enclave-ffi-types.h ./target/headers/
-	@ #this pulls out ELF symbols, 80% size reduction!
-
-
-build-rust: build-headers librust_cosmwasm_enclave.signed.so query_enclave lib/libEnclave_u.a lib/libQueryEnclave_u.a
+build-rust: librust_cosmwasm_enclave.signed.so query_enclave lib/libEnclave_u.a lib/libQueryEnclave_u.a
 	cargo build -Z unstable-options --profile $(BUILD_PROFILE) --features "$(FEATURES_U)"
 	cp target/$(BUILD_PROFILE)/libgo_cosmwasm.$(DLL_EXT) api
 	@ #this pulls out ELF symbols, 80% size reduction!
@@ -91,10 +84,10 @@ lib/libEnclave_u.a: $(Enclave_Path)/Enclave.edl target/headers/enclave-ffi-types
 lib/libQueryEnclave_u.a: $(Query_Enclave_Path)/Enclave.edl target/headers/enclave-ffi-types.h build-query_enclave
 	mkdir -p query_enclave
 	sgx_edger8r --untrusted $< --search-path $(SGX_SDK)/include --search-path $(CUSTOM_EDL_PATH) --untrusted-dir ./query_enclave
-	$(CC) $(App_C_Flags) -c ./query_enclave/Enclave_u.c -o ./Query_Enclave_u.o
-	rm ./query_enclave/Enclave_u.c
-	$(AR) rcsD $@ Query_Enclave_u.o
+	$(CC) $(App_C_Flags) -c ./query_enclave/Enclave_u.c -o ./QueryEnclave_u.o
+	mv query_enclave/Enclave_u.h ./QueryEnclave_u.h
 	rm -rf query_enclave
+	$(AR) rcsD $@ QueryEnclave_u.o
 
 # This file gets generated whenever we build this crate, because enclave-ffi-types is our dependency
 # but when running the build for the first time, there's an interdependency between the .edl which requires this
@@ -167,7 +160,7 @@ test-alpine:
 
 .PHONY: clean
 clean:
-	rm -rf lib $(Enclave_EDL_Products) $(Query_Enclave_EDL_Products) *.o *.so
+	rm -rf lib $(Enclave_EDL_Products) $(Query_Enclave_EDL_Products) *.o *.so api/*.so
 	cargo clean
 
 .PHONY: clean-all

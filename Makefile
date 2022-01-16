@@ -108,7 +108,7 @@ LD_FLAGS := $(ldflags)
 all: build_all
 
 vendor:
-	# cargo vendor third_party/vendor --manifest-path third_party/build/Cargo.toml
+	cargo vendor third_party/vendor --manifest-path third_party/build/Cargo.toml
 
 go.sum: go.mod
 	@echo "--> Ensure dependencies have not been modified"
@@ -214,6 +214,7 @@ clean:
 	-rm -rf ./cmd/secretd/ias_bin*
 	$(MAKE) -C go-cosmwasm clean-all
 	$(MAKE) -C cosmwasm/packages/wasmi-runtime clean
+	$(MAKE) -C cosmwasm/packages/enclaves/query clean
 
 build-dev-image:
 	docker build --build-arg BUILD_VERSION=${VERSION} --build-arg SGX_MODE=SW --build-arg FEATURES= -f deployment/dockerfiles/base.Dockerfile -t rust-go-base-image .

@@ -6,19 +6,6 @@ members = [
   "packages/shared/*",
   "packages/std",
   "packages/storage",
-  "packages/enclaves/query",
   "packages/cosmwasm-proto",
-  "packages/wasmi-runtime"
 ]
-exclude = ["contracts", "packages/enclave-test"]
-
-[profile.release]
-opt-level = 3
-debug = false
-debug-assertions = false
-overflow-checks = false
-lto = false
-panic = 'unwind'
-incremental = false
-codegen-units = 16
-rpath = false
+exclude = ["contracts", "packages/wasmi-runtime", "packages/enclaves", "packages/enclave-test"]
