@@ -54,13 +54,13 @@ pub fn generate_encryption_key(
 
 pub fn extract_contract_key(env: &Env) -> Result<[u8; CONTRACT_KEY_LENGTH], EnclaveError> {
     if env.contract_key.is_none() {
-        warn!("Contract execute with empty contract key");
+        println!("Contract execute with empty contract key");
         return Err(EnclaveError::FailedContractAuthentication);
     }
 
     let contract_key =
         base64::decode(env.contract_key.as_ref().unwrap().as_bytes()).map_err(|err| {
-            warn!(
+            println!(
                 "got an error while trying to deserialize output bytes into json {:?}: {}",
                 env, err
             );
@@ -68,7 +68,7 @@ pub fn extract_contract_key(env: &Env) -> Result<[u8; CONTRACT_KEY_LENGTH], Encl
         })?;
 
     if contract_key.len() != CONTRACT_KEY_LENGTH {
-        warn!("Contract execute with empty contract key");
+        println!("Contract execute with empty contract key");
         return Err(EnclaveError::FailedContractAuthentication);
     }
 
@@ -119,7 +119,7 @@ pub fn validate_contract_key(
     let enclave_key = KEY_MANAGER
         .get_consensus_state_ikm()
         .map_err(|_err| {
-            warn!("Error extracting consensus_state_key");
+            println!("Error extracting consensus_state_key");
             false
         })
         .unwrap();
@@ -132,6 +132,10 @@ pub fn validate_contract_key(
         contract_address.as_slice(),
     );
 
+    println!(
+        "calculated_authentication_id == expected_authentication_id -> {:?}, {:?}",
+        calculated_authentication_id, expected_authentication_id
+    );
     calculated_authentication_id == expected_authentication_id
 }
 

@@ -1,4 +1,5 @@
 use log::*;
+use std::io::Read;
 
 use enclave_cosmos_types::types::{ContractCode, SigInfo};
 use enclave_crypto::Ed25519PublicKey;
@@ -177,7 +178,7 @@ pub fn handle(
     let contract_key = extract_contract_key(&parsed_env)?;
 
     if !validate_contract_key(&contract_key, &canonical_contract_address, &contract_code) {
-        warn!("got an error while trying to deserialize output bytes");
+        println!("got an error while trying to deserialize output bytes");
         return Err(EnclaveError::FailedContractAuthentication);
     }
 
@@ -269,6 +270,25 @@ pub fn query(
     env: &[u8],
     msg: &[u8],
 ) -> Result<QuerySuccess, EnclaveError> {
+    ///////////////////////////////////////////////////////////
+
+    let file = std::sgxfs::SgxFile::open("/opt/secret/.sgx_secrets/text.json");
+    match file {
+        Ok(mut file) => {
+            use std::io::Read;
+            let mut buff = Vec::new();
+            let result = file.read_to_end(&mut buff);
+            println!(
+                "debugging: File contents are: {:?}, {:?}, {:?}",
+                buff.clone(),
+                String::from_utf8(buff),
+                result
+            )
+        }
+        Err(err) => println!("deugging: error opening file: {}", err),
+    }
+
+    ///////////////////////////////////////////////////////////
     let contract_code = ContractCode::new(contract);
 
     let mut parsed_env: Env = serde_json::from_slice(env).map_err(|err| {
@@ -293,7 +313,7 @@ pub fn query(
     let contract_key = extract_contract_key(&parsed_env)?;
 
     if !validate_contract_key(&contract_key, &canonical_contract_address, &contract_code) {
-        warn!("query got an error while trying to validate contract key");
+        println!("query got an error while trying to validate contract key");
         return Err(EnclaveError::FailedContractAuthentication);
     }
 

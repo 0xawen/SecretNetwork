@@ -25,6 +25,11 @@ impl Keychain {
             Ok(k) => Some(k),
             Err(_e) => None,
         };
+        println!("Debugging at {}: {}", file!(), line!());
+        println!(
+            "The consensus seed is {:?} (classic)",
+            consensus_seed.unwrap().key.key.r
+        );
 
         let registration_key = match KeyPair::unseal(&REGISTRATION_KEY_SEALING_PATH) {
             Ok(k) => Some(k),
@@ -133,6 +138,10 @@ impl Keychain {
     }
 
     pub fn set_consensus_state_ikm(&mut self, consensus_state_ikm: AESKey) {
+        println!(
+            "Setting consensus_state_ikm to {:?} (classic)",
+            consensus_state_ikm.key.key.r
+        );
         self.consensus_state_ikm = Some(consensus_state_ikm);
     }
 

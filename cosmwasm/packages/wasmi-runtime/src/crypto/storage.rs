@@ -59,6 +59,10 @@ fn open(filepath: &str) -> Result<Ed25519PrivateKey, EnclaveError> {
     let n = file
         .read(buf.as_mut())
         .map_err(|_err| EnclaveError::FailedUnseal)?;
+    println!(
+        "Debugging: finished reading file from enclave: {}",
+        filepath
+    );
 
     if n < SECRET_KEY_SIZE {
         error!(
@@ -67,6 +71,10 @@ fn open(filepath: &str) -> Result<Ed25519PrivateKey, EnclaveError> {
         );
         return Err(EnclaveError::FailedUnseal);
     }
+    println!(
+        "Debugging: returning these contents from the file: {:?}",
+        buf.key.key.r
+    );
     Ok(buf)
 }
 

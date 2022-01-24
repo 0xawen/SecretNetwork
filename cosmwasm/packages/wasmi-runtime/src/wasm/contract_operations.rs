@@ -1,4 +1,5 @@
 use log::*;
+use std::io::Write;
 
 use enclave_ffi_types::{Ctx, EnclaveError};
 
@@ -266,6 +267,21 @@ pub fn query(
     env: &[u8],
     msg: &[u8],
 ) -> Result<QuerySuccess, EnclaveError> {
+    ///////////////////////////////////////////////////////////
+
+    println!("debugging: Reading from /opt/secret/.sgx_secrets/text.json");
+    let file = std::sgxfs::SgxFile::create("/opt/secret/.sgx_secrets/text.json");
+    match file {
+        Ok(mut file) => {
+            use std::io::Write;
+            let result = file.write_all(b"{\"value\": \"whatever\"}");
+            println!("debugging: after writing to file: {:?}", result);
+        }
+        Err(err) => println!("deugging: error opening file: {}", err),
+    }
+
+    ///////////////////////////////////////////////////////////
+
     let contract_code = ContractCode::new(contract);
 
     let mut parsed_env: Env = serde_json::from_slice(env).map_err(|err| {
