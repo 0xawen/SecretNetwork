@@ -4,12 +4,7 @@ use crate::{AESKey, KeyPair, Seed, SECRET_KEY_SIZE};
 use enclave_ffi_types::EnclaveError;
 use log::*;
 use std::io::{Read, Write};
-
-#[cfg(feature = "SGX")]
 use std::sgxfs::SgxFile;
-
-#[cfg(not(feature = "SGX"))]
-use std::fs::File as SgxFile;
 
 impl SealedKey for AESKey {
     fn seal(&self, filepath: &str) -> Result<(), EnclaveError> {

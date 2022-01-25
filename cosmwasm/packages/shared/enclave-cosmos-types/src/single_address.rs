@@ -6,12 +6,6 @@ use crate::types::CosmosAddress;
 use enclave_crypto::hash::ripemd::ripemd160;
 use enclave_crypto::hash::sha::sha_256;
 
-// #[cfg(feature = "SGX")]
-// use prost_sgx as prost;
-//
-// #[cfg(not(feature = "SGX"))]
-// use prost;
-
 impl CosmosAminoPubkey for Secp256k1PubKey {
     fn get_address(&self) -> CosmosAddress {
         // This reference describes how this should be derived:

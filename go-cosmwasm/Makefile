@@ -87,6 +87,7 @@ lib/libQueryEnclave_u.a: $(Query_Enclave_Path)/Enclave.edl target/headers/enclav
 	$(CC) $(App_C_Flags) -c ./query_enclave/Enclave_u.c -o ./QueryEnclave_u.o
 	mv query_enclave/Enclave_u.h ./QueryEnclave_u.h
 	rm -rf query_enclave
+	mkdir -p lib
 	$(AR) rcsD $@ QueryEnclave_u.o
 
 # This file gets generated whenever we build this crate, because enclave-ffi-types is our dependency

@@ -9,9 +9,7 @@ use super::traits::WasmiApi;
 #[derive(PartialEq, Eq)]
 pub enum HostFunctions {
     ReadDbIndex = 0,
-    #[cfg(not(feature = "query-only"))]
     WriteDbIndex = 1,
-    #[cfg(not(feature = "query-only"))]
     RemoveDbIndex = 2,
     CanonicalizeAddressIndex = 3,
     HumanizeAddressIndex = 4,
@@ -26,9 +24,7 @@ impl From<usize> for HostFunctions {
     fn from(v: usize) -> Self {
         match v {
             x if x == HostFunctions::ReadDbIndex as usize => HostFunctions::ReadDbIndex,
-            #[cfg(not(feature = "query-only"))]
             x if x == HostFunctions::WriteDbIndex as usize => HostFunctions::WriteDbIndex,
-            #[cfg(not(feature = "query-only"))]
             x if x == HostFunctions::RemoveDbIndex as usize => HostFunctions::RemoveDbIndex,
             x if x == HostFunctions::CanonicalizeAddressIndex as usize => {
                 HostFunctions::CanonicalizeAddressIndex
@@ -69,7 +65,6 @@ impl Externals for ContractInstance {
                 })?;
                 self.read_db_index(key)
             }
-            #[cfg(not(feature = "query-only"))]
             HostFunctions::RemoveDbIndex => {
                 let key: i32 = args.nth_checked(0).map_err(|err| {
                     warn!(
@@ -80,7 +75,6 @@ impl Externals for ContractInstance {
                 })?;
                 self.remove_db_index(key)
             }
-            #[cfg(not(feature = "query-only"))]
             HostFunctions::WriteDbIndex => {
                 let key: i32 = args.nth_checked(0).map_err(|err| {
                     warn!(

@@ -294,6 +294,15 @@ impl WasmiApi for ContractInstance {
     /// 1. "key" to delete from Tendermint (buffer of bytes)
     /// key is a pointer to a region "struct" of "pointer" and "length"
     /// A Region looks like { ptr: u32, len: u32 }
+    #[cfg(feature = "query-only")]
+    fn remove_db_index(&mut self, _state_key_ptr_ptr: i32) -> Result<Option<RuntimeValue>, Trap> {
+        return Err(WasmEngineError::UnauthorizedWrite.into());
+    }
+
+    /// Args:
+    /// 1. "key" to delete from Tendermint (buffer of bytes)
+    /// key is a pointer to a region "struct" of "pointer" and "length"
+    /// A Region looks like { ptr: u32, len: u32 }
     #[cfg(not(feature = "query-only"))]
     fn remove_db_index(&mut self, state_key_ptr_ptr: i32) -> Result<Option<RuntimeValue>, Trap> {
         if self.operation.is_query() {
@@ -317,6 +326,20 @@ impl WasmiApi for ContractInstance {
         self.use_gas_externally(gas_used)?;
 
         Ok(None)
+    }
+
+    /// Args:
+    /// 1. "key" to write to Tendermint (buffer of bytes)
+    /// 2. "value" to write to Tendermint (buffer of bytes)
+    /// Both of them are pointers to a region "struct" of "pointer" and "length"
+    /// Lets say Region looks like { ptr: u32, len: u32 }
+    #[cfg(feature = "query-only")]
+    fn write_db_index(
+        &mut self,
+        _state_key_ptr_ptr: i32,
+        _value_ptr_ptr: i32,
+    ) -> Result<Option<RuntimeValue>, Trap> {
+        return Err(WasmEngineError::UnauthorizedWrite.into());
     }
 
     /// Args:
